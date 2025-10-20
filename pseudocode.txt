@@ -1,0 +1,70 @@
+===========================
+Caesar Cipher Pseudocode
+===========================
+FUNCTION CaesarEncrypt(text, shift):
+    result ← ""
+    FOR each char c IN text:
+        IF isLetter(c):
+            base ← 'A' IF isUpper(c) ELSE 'a'
+            pos ← ord(c) - ord(base)
+            enc ← (pos + shift) MOD 26
+            result ← result + chr(enc + ord(base))
+        ELSE:
+            result ← result + c
+    RETURN result
+
+FUNCTION CaesarDecrypt(cipher, shift):
+    RETURN CaesarEncrypt(cipher, 26 - (shift MOD 26))
+
+
+===========================
+Vigenère Cipher Pseudocode
+===========================
+FUNCTION VigenereEncrypt(text, key):
+    shifts ← [ord(k.lower()) - ord('a') FOR each k IN key]
+    result ← ""
+    i ← 0
+    FOR each char c IN text:
+        IF isLetter(c):
+            base ← 'A' IF isUpper(c) ELSE 'a'
+            pos ← ord(c) - ord(base)
+            shift ← shifts[i MOD len(shifts)]
+            enc ← (pos + shift) MOD 26
+            result ← result + chr(enc + ord(base))
+            i ← i + 1
+        ELSE:
+            result ← result + c
+    RETURN result
+
+FUNCTION VigenereDecrypt(cipher, key):
+    SAME AS Encrypt but use (pos - shift) MOD 26
+
+
+===========================
+AES (Advanced Encryption Standard) Pseudocode
+===========================
+FUNCTION AES256_CBC_Encrypt(plaintext, passphrase):
+    salt ← RANDOM(16)
+    key ← PBKDF2_HMAC_SHA256(passphrase, salt, iterations)
+    iv ← RANDOM(16)
+    pt ← PKCS7_PAD(plaintext, block=16)
+    prev ← iv
+    out ← []
+    FOR block IN CHOP(pt, 16):
+        x ← XOR(block, prev)
+        c ← AES256_ENCRYPT_BLOCK(x, key)
+        out.APPEND(c)
+        prev ← c
+    RETURN CONCAT(salt, iv, out)
+
+FUNCTION AES256_CBC_Decrypt(blob, passphrase):
+    salt, iv, ct ← SPLIT(blob)
+    key ← PBKDF2_HMAC_SHA256(passphrase, salt, iterations)
+    prev ← iv
+    pt ← []
+    FOR block IN CHOP(ct, 16):
+        x ← AES256_DECRYPT_BLOCK(block, key)
+        p ← XOR(x, prev)
+        pt.APPEND(p)
+        prev ← block
+    RETURN PKCS7_UNPAD(CONCAT(pt))
